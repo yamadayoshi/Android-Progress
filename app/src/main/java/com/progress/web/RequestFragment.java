@@ -13,13 +13,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.progress.adapter.RVRequestAdapter;
+import com.progress.classes.ItemListAdapter;
 import com.progress.classes.Request;
 import com.progress.classes.RestRead;
 
@@ -32,6 +36,7 @@ public class RequestFragment extends Fragment {
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRequest;
     private TextView tvRequestCount;
+    private AutoCompleteTextView autoSearch;
     private ProgressBar progressBar;
 
     public RequestFragment() {
@@ -46,6 +51,7 @@ public class RequestFragment extends Fragment {
         recyclerView = view.findViewById(R.id.rv_requests_list);
         swipeRequest = view.findViewById(R.id.swp_request);
         tvRequestCount = view.findViewById(R.id.tv_request_count);
+        autoSearch = view.findViewById(R.id.edt_search_request);
         progressBar = view.findViewById(R.id.pb_request);
 
         progressBar.setVisibility(View.VISIBLE);
@@ -55,6 +61,35 @@ public class RequestFragment extends Fragment {
         recyclerView.setLayoutManager(linearLayoutManager);
 
         loadRequest();
+
+        autoSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (start > 0 || count > 0) {
+                    requestAdapter.getFilter().filter(s);
+                }else {
+                    try {
+                        requestAdapter = new RVRequestAdapter(new RestRead().execute(MainActivity.endpoint+"/request/api/all", "request").get());
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                recyclerView.setAdapter(requestAdapter);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         swipeRequest.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -79,6 +114,7 @@ public class RequestFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        autoSearch.getText().clear();
         loadRequest();
     }
 

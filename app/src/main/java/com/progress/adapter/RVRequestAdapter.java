@@ -9,23 +9,26 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.progress.classes.Client;
+import com.progress.classes.Item;
 import com.progress.classes.Request;
 import com.progress.classes.RestRead;
 import com.progress.web.MainActivity;
 import com.progress.web.R;
 import com.progress.web.RequestData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class RVRequestAdapter extends RecyclerView.Adapter<RVRequestAdapter.RequestViewHolder> {
+public class RVRequestAdapter extends RecyclerView.Adapter<RVRequestAdapter.RequestViewHolder> implements Filterable {
 
     private List<Request> requests;
-    private ProgressBar progressBar;
 
     public RVRequestAdapter(List<Request> requests) {
         this.requests = requests;
@@ -37,8 +40,6 @@ public class RVRequestAdapter extends RecyclerView.Adapter<RVRequestAdapter.Requ
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.request_view, viewGroup, false);
 
         RequestViewHolder requestViewHolder = new RequestViewHolder(view);
-
-
 
         return requestViewHolder;
     }
@@ -81,6 +82,39 @@ public class RVRequestAdapter extends RecyclerView.Adapter<RVRequestAdapter.Requ
     @Override
     public int getItemCount() {
         return requests.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults filter = new FilterResults();
+                String text = (String) constraint;
+
+                if (constraint.length() == 0)
+                    filter.values = requests;
+                else {
+                    List<Request> filterRequest = new ArrayList<>();
+
+                    for (Request request : requests) {
+                        if (request.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                            filterRequest.add(request);
+                        }
+                    }
+
+                    filter.values = filterRequest;
+                }
+
+                return filter;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                requests = (List<Request>) results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public static class RequestViewHolder extends RecyclerView.ViewHolder {

@@ -9,18 +9,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.progress.classes.Client;
+import com.progress.classes.Request;
 import com.progress.classes.RestRead;
 import com.progress.web.ClientData;
 import com.progress.web.MainActivity;
 import com.progress.web.R;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class RVClientAdapter extends RecyclerView.Adapter<RVClientAdapter.ClientViewHolder> {
+public class RVClientAdapter extends RecyclerView.Adapter<RVClientAdapter.ClientViewHolder> implements Filterable {
 
     List<Client> clients;
 
@@ -78,6 +82,39 @@ public class RVClientAdapter extends RecyclerView.Adapter<RVClientAdapter.Client
     @Override
     public int getItemCount() {
         return clients.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults filter = new FilterResults();
+                String text = (String) constraint;
+
+                if (constraint.length() == 0)
+                    filter.values = clients;
+                else {
+                    List<Client> filterClient = new ArrayList<>();
+
+                    for (Client client : clients) {
+                        if (client.getName().toLowerCase().contains(text.toLowerCase())) {
+                            filterClient.add(client);
+                        }
+                    }
+
+                    filter.values = filterClient;
+                }
+
+                return filter;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                clients = (List<Client>) results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public static class ClientViewHolder extends RecyclerView.ViewHolder {

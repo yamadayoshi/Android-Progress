@@ -30,13 +30,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ClientFragment"
             android:label="@string/title_client"
@@ -64,8 +58,18 @@
             android:name=".RequestData"
             android:label="@string/title_activity_request_data"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".SelectItem"
+        <activity
+            android:name=".SelectItem"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Splash"
+            android:theme="@style/Splash">
+
+         <intent-filter>
+         <action android:name="android.intent.action.MAIN" />
+
+         <category android:name="android.intent.category.LAUNCHER" />
+         </intent-filter>
+        </activity>
     </application>
 
 </manifest>

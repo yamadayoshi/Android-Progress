@@ -119,7 +119,7 @@
     <string name="running">Em Andamento</string>
     <string name="search_client_here">Search client here</string>
     <string name="search_request_here">Search request here</string>
-    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
 
@@ -128,8 +128,8 @@
     <string name="NoInternet">So human, where is the internet?</string>
     <string name="oh_no">Oh no!</string>
     <string name="retry">Retry</string>
-    <string name="title_activity_client_data">Client data</string>
-    <string name="title_activity_request_data">RequestData</string>
+    <string name="title_activity_client_data">Client</string>
+    <string name="title_activity_request_data">Request</string>
     <string name="search">Search</string>
     <string name="update">Update</string>
     <string name="select_artifact">Select Artifact</string>

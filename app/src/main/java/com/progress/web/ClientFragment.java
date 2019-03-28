@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.progress.adapter.RVClientAdapter;
+import com.progress.adapter.RVRequestAdapter;
 import com.progress.classes.Client;
 import com.progress.classes.RestRead;
 
@@ -70,7 +71,19 @@ public class ClientFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (start > 0 || count > 0) {
+                    clientAdapter.getFilter().filter(s);
+                }else {
+                    try {
+                        clientAdapter = new RVClientAdapter(new RestRead().execute(MainActivity.endpoint + "/client/api/all", "client").get());
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
 
+                recyclerViewClient.setAdapter(clientAdapter);
             }
 
             @Override
@@ -94,6 +107,7 @@ public class ClientFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        edtClientSearch.getText().clear();
         loadClient();
     }
 

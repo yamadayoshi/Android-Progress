@@ -2,6 +2,8 @@ package com.progress.web;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -54,6 +56,9 @@ public class RequestData extends AppCompatActivity {
         tvClient = findViewById(R.id.tv_clients);
         spnStatus = findViewById(R.id.spn_request_status);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+
         // update
         final Bundle extras = getIntent().getExtras();
 
@@ -67,13 +72,16 @@ public class RequestData extends AppCompatActivity {
 
                 adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[] {"Open", "Running", "Closed"});
                 status = adapter.getPosition(extras.getString("status"));
+
+                client = String.valueOf(extras.getInt("client"));
+                artifact = String.valueOf(extras.getInt("artifact"));
+
+                btnApply.setText(getString(R.string.update));
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            btnApply.setText(getString(R.string.update));
         } else {
             adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{"Open"});
             status = 0;
@@ -105,7 +113,7 @@ public class RequestData extends AppCompatActivity {
                             + edtDeveloperDescription.getText().toString().replace(" ", "%20") + "&clientId=" + client + "&screenId=" + artifact);
                  } else {
                     new RestRead().execute(MainActivity.endpoint + "/request/api/update/" + extras.getInt("id") + "?title=" + edtTitle.getText().toString().replace(" ", "%20") + "&clientDescription=" + edtClientDescription.getText().toString().replace(" ", "%20") + "&devDescription="
-                            + edtDeveloperDescription.getText().toString().replace(" ", "%20") + "&clientId=" + client + "&screenId=" + artifact + "&status=" + spnStatus.getSelectedItem().toString());
+                            + edtDeveloperDescription.getText().toString().replace(" ", "%20") + "&clientId=" + client + "&screenId=" + artifact  + "&status=" + spnStatus.getSelectedItem().toString());
                 }
 
                 finish();
@@ -139,5 +147,11 @@ public class RequestData extends AppCompatActivity {
 
         it.putExtras(it);
         startActivityForResult(it, INTENT_RESULT);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

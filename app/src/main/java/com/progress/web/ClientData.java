@@ -2,6 +2,7 @@ package com.progress.web;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,6 +32,7 @@ public class ClientData extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+
 
         edtName = findViewById(R.id.edt_client_name);
         edtCNPJ = findViewById(R.id.edt_client_cnpj);
@@ -71,7 +73,7 @@ public class ClientData extends AppCompatActivity {
 
                 if (!error) {
                     if (extras != null) {
-                        // add
+                        // update
                         new RestRead().execute(MainActivity.endpoint + "/client/api/update/" + extras.getInt("id") + "?name=" + edtName.getText().toString().replace(" ", "%20") + "&cpf=" + edtCNPJ.getText().toString() + "&email=" + edtEmail.getText().toString() + "&phone=" + edtPhone.getText().toString());
                     } else
                         // add

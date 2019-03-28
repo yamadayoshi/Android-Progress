@@ -35,14 +35,8 @@ public class MainActivity extends AppCompatActivity {
         navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        if (new Network().getConnectivityStatus(getBaseContext())) {
-            homeActivity = new HomeFragment();
-            fragmentManager(homeActivity);
-        }else {
-            Intent it = new Intent(getBaseContext(), NoInternetActivity.class);
-            startActivity(it);
-            finish();
-        }
+        homeActivity = new HomeFragment();
+        fragmentManager(homeActivity);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
