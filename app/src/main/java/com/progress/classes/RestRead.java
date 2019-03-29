@@ -2,9 +2,6 @@ package com.progress.classes;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +85,11 @@ public class RestRead extends AsyncTask<String, Integer, List>{
                     request.setDevDesc(json.getString("requestDevDescription"));
 
                     date = json.getString("requestEntryDate").replace("[", "").replace("]", "").split(",");
-                    request.setDate(new Date(Integer.valueOf(date[0]), Integer.valueOf(date[1]), Integer.valueOf(date[2])));
+
+                    request.setDate(new Date(new SimpleDateFormat("dd-MM-yyyy").parse(date[2] + "-" + date[1] + "-" + date[0]).getTime()));
+
+//                    dateRequest = new SimpleDateFormat("dd-MM-yyyy").parse(Integer.valueOf(date[0]) + "-" + Integer.valueOf(date[1]) + "-" + Integer.valueOf(date[2]));
+//                    request.setDate((java.sql.Date) new Date(dateRequest.getTime()));
 
                     request.setStatus(json.getString("status"));
 
@@ -103,6 +106,8 @@ public class RestRead extends AsyncTask<String, Integer, List>{
                     requestList.add(request);
 
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }

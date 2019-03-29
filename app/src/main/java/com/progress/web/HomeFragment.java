@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -38,6 +40,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -54,6 +57,8 @@ public class HomeFragment extends Fragment {
     private GraphView graphView;
     private DisplayMetrics metrics;
     private ProgressBar progressBar;
+    private LineGraphSeries<DataPoint> series;
+    private int year;
 
     public HomeFragment() {
 
@@ -75,9 +80,11 @@ public class HomeFragment extends Fragment {
 
         progressBar.setVisibility(View.VISIBLE);
 
+        year = 2019;
+
         metrics = view.getResources().getDisplayMetrics();
 
-        swipeRefreshLayout.setDistanceToTriggerSync(900);
+        swipeRefreshLayout.setDistanceToTriggerSync(700);
 
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent), getResources().getColor(R.color.colorEdit), getResources().getColor(R.color.colorPrimary));
 
@@ -85,56 +92,12 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setLayoutManager(linearLayout);
 
-        loadData();
-
-        //
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(
-                new DataPoint[] {
-                        new DataPoint(1, 5),
-                        new DataPoint(2, 9),
-                        new DataPoint(3, 7),
-                        new DataPoint(4, 10),
-                        new DataPoint(5, 0),
-                        new DataPoint(6, 0),
-                        new DataPoint(7, 0),
-                        new DataPoint(8, 0),
-                        new DataPoint(9, 0),
-                        new DataPoint(10, 0),
-                        new DataPoint(11, 0),
-                        new DataPoint(12, 0)
-                }
-        );
-
-        LineGraphSeries<DataPoint> series2018 = new LineGraphSeries<>(
-                new DataPoint[] {
-                        new DataPoint(1, 9),
-                        new DataPoint(2, 7),
-                        new DataPoint(3, 5),
-                        new DataPoint(4, 20),
-                        new DataPoint(5, 0),
-                        new DataPoint(6, 0),
-                        new DataPoint(7, 0),
-                        new DataPoint(8, 0),
-                        new DataPoint(9, 0),
-                        new DataPoint(10, 0),
-                        new DataPoint(11, 0),
-                        new DataPoint(12, 0)
-                }
-        );
-
-        series.setTitle("2019");
-        series.setColor(Color.YELLOW);
-        series.setBackgroundColor(Color.argb(100, 255, 255, 0));
-        series.setDrawBackground(true);
-        series.setDrawDataPoints(true);
-
-        series2018.setTitle("2018");
-        series2018.setDrawDataPoints(true);
+        loadFromRest();
 
         series.setOnDataPointTapListener(new OnDataPointTapListener() {
             @Override
             public void onTap(Series series, DataPointInterface dataPoint) {
-//                Toast.makeText(getBaseContext(), "Series1: On Data Point clicked: "+dataPoint, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), new DateFormatSymbols().getMonths()[(int) dataPoint.getX() - 1] + ": " + (int) dataPoint.getY() + " chamados", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -144,23 +107,24 @@ public class HomeFragment extends Fragment {
         graphView.getViewport().setMinX(1);
         graphView.getViewport().setMaxX(12);
 
+        graphView.getLegendRenderer().setVisible(true);
+
         graphView.getViewport().setScalable(true);
         graphView.getViewport().setScalableY(true);
 
         graphView.addSeries(series);
-        graphView.addSeries(series2018);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadData();
+                loadFromRest();
             }
         });
 
         return view;
     }
 
-    private void loadData() {
+    private void loadFromRest() {
         // get data from rest
         try {
             if (new Network().getConnectivityStatus(getContext())) {
@@ -180,13 +144,10 @@ public class HomeFragment extends Fragment {
                 // graph request by month
                 loadGraph();
 
-                progressBar.setVisibility(View.GONE);
             }else {
                 Intent it = new Intent(getContext(), NoInternetActivity.class);
                 startActivity(it);
             }
-
-            swipeRefreshLayout.setRefreshing(false);
         } catch (ExecutionException e) {
             e.printStackTrace();
             Intent it = new Intent(getContext(), NoInternetActivity.class);
@@ -196,9 +157,50 @@ public class HomeFragment extends Fragment {
             Intent it = new Intent(getContext(), NoInternetActivity.class);
             startActivity(it);
         }
+
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void loadGraph() {
+        long[] requests = new long[12];
 
+        try {
+            for (int i = 0; i < 12; i++) {
+                requests[i] = (long) new RestRead().execute(endpoint + "/request/api/countByMonth?month=" + String.valueOf(i+1) + "&year=" + year, "count").get().get(0);
+            }
+
+            series = new LineGraphSeries<>(
+                    new DataPoint[] {
+                        new DataPoint(1, requests[0]),
+                        new DataPoint(2, requests[1]),
+                        new DataPoint(3, requests[2]),
+                        new DataPoint(4, requests[3]),
+                        new DataPoint(5, requests[4]),
+                        new DataPoint(6, requests[5]),
+                        new DataPoint(7, requests[6]),
+                        new DataPoint(8, requests[7]),
+                        new DataPoint(9, requests[8]),
+                        new DataPoint(10, requests[9]),
+                        new DataPoint(11, requests[10]),
+                        new DataPoint(12, requests[11])
+                    }
+            );
+
+            series.setTitle("2019");
+            series.setColor(Color.BLUE);
+            series.setBackgroundColor(Color.argb(70, 85, 138, 181));
+            series.setDrawBackground(true);
+            series.setDrawDataPoints(true);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadFromRest();
     }
 }

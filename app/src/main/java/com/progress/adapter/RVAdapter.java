@@ -11,10 +11,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.progress.classes.Request;
+import com.progress.classes.RestRead;
 import com.progress.web.ClientFragment;
+import com.progress.web.MainActivity;
 import com.progress.web.R;
+import com.progress.web.RequestData;
+import com.progress.web.RequestFragment;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.RequestViewHolder> {
 
@@ -44,8 +49,27 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.RequestViewHolder>
         requestViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent it = new Intent(requestViewHolder.itemView.getContext(), ClientFragment.class);
-                requestViewHolder.itemView.getContext().startActivity(it);
+                try {
+                    List<Request> request = new RestRead().execute(MainActivity.endpoint + "/request/api/findById/" + requests.get(i).getId(), "request").get();
+
+                    if (request != null) {
+                        Intent it = new Intent(v.getContext(), RequestData.class);
+
+                        it.putExtra("id", request.get(0).getId());
+                        it.putExtra("status", request.get(0).getStatus());
+                        it.putExtra("title", request.get(0).getTitle());
+                        it.putExtra("clientDesc", request.get(0).getClientDesc());
+                        it.putExtra("devDesc", request.get(0).getDevDesc());
+                        it.putExtra("artifact", request.get(0).getArtifact().getId());
+                        it.putExtra("client", request.get(0).getClient().getId());
+
+                        v.getContext().startActivity(it);
+                    }
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
